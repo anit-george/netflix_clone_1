@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Youtube from "react-youtube";
 import "./RowPost.css";
-import { API_KEY, imageUrl } from "../../Constants/Constants";
-import axios from "axios"; // Import axios from the package
+import {
+  imageUrl,
+  baseUrl,
+  API_KEY,
+  Bearer_token,
+} from "../../Constants/Constants";
+import axios from "axios";
 
 function RowPost(props) {
   const [movies, setMovies] = useState([]);
@@ -12,12 +17,13 @@ function RowPost(props) {
     axios
       .get(props.url)
       .then((response) => {
+        console.log("Movies fetched:", response.data.results);
         setMovies(response.data.results);
       })
       .catch((err) => {
-        //alert("Network error");
+        console.error("Error fetching movies:", err);
       });
-  }, [props.url]); // Include props.url in the dependency array
+  }, [props.url]);
 
   const opts = {
     height: "390",
@@ -28,14 +34,25 @@ function RowPost(props) {
   };
 
   const handleMovie = (id) => {
+    console.log(`Fetching videos for movie ID: ${id}`);
     axios
-      .get(`/movie/${id}/videos?api_key=${API_KEY}&language=en-US`)
+      .get(`${baseUrl}/movie/${id}/videos?language=en-US`, {
+        headers: {
+          Authorization: `Bearer ${Bearer_token}`,
+          accept: "application/json",
+        },
+      })
       .then((response) => {
+        console.log("Video response:", response.data);
         if (response.data.results.length !== 0) {
-          setUrlId(response.data.results[0]);
+          setUrlId(response.data.results[0].key); // Access the video key
         } else {
-          console.log("Array empty");
+          console.log("No videos found for this movie");
+          setUrlId(""); // Clear the URL ID to hide the YouTube player if no videos are found
         }
+      })
+      .catch((err) => {
+        console.error("Error fetching movie videos:", err);
       });
   };
 
@@ -53,7 +70,7 @@ function RowPost(props) {
           />
         ))}
       </div>
-      {urlId && <Youtube opts={opts} videoId={urlId.key} />}
+      {urlId && <Youtube opts={opts} videoId={urlId} />}
     </div>
   );
 }
