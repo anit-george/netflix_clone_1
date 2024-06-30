@@ -12,11 +12,17 @@ import "./App.css";
 import Banner from "./Components/Banner/Banner";
 import RowPost from "./Components/RowPost/RowPost";
 
+function truncate(str, n) {
+  return str?.length > n ? str.substr(0, n - 1) + "..." : str;
+}
+
 function App() {
   return (
     <div className="App">
       <NavBar />
       <Banner />
+      <br />
+      <br />
       <RowPost url={originals} title="Netflix Originals" />
       <RowPost url={action} title="Action" isSmall />
       <RowPost url={ComedyMovies} title="Comedy Movies" isSmall />
